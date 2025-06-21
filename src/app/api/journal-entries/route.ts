@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+
 import { journalEntrySchema } from '@/lib/validation';
 import { z } from 'zod';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 export async function GET() {
   try {
@@ -18,7 +21,7 @@ export async function GET() {
     });
     return NextResponse.json(journalEntries);
   } catch (error) {
-    console.error('Error fetching journal entries:', error);
+    console.error(error);
     return NextResponse.json({ error: 'Failed to fetch journal entries' }, { status: 500 });
   }
 }
