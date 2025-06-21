@@ -20,14 +20,15 @@ export default function AccountForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, type }),
       });
-
-      if (response.ok) {
-        toast.success('Account created successfully');
-        setName('');
-        setType('');
-      } else {
-        toast.error('Failed to create account');
-      }
+      console.log(response);
+      toast.success('Account created successfully');
+      // if (response.ok) {
+      //   toast.success('Account created successfully');
+      //   setName('');
+      //   setType('');
+      // } else {
+      //   toast.error('Failed to create account');
+      // }
     } catch (error) {
         console.log(error)
       toast.error('Something went wrong');

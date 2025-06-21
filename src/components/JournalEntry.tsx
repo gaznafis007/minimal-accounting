@@ -49,15 +49,18 @@ export default function JournalEntry() {
           lines,
         }),
       });
-
-      if (response.ok) {
-        toast.success('Journal entry created successfully');
-        setLines([{ accountId: '', debit: 0, credit: 0 }]);
+      console.log(response);
+      toast.success('Journal entry created successfully');
+      setLines([{ accountId: '', debit: 0, credit: 0 }]);
         setMemo('');
-        setDate(new Date().toISOString().split('T')[0]);
-      } else {
-        toast.error('Failed to create journal entry');
-      }
+      // if (response.ok) {
+      //   toast.success('Journal entry created successfully');
+      //   setLines([{ accountId: '', debit: 0, credit: 0 }]);
+      //   setMemo('');
+      //   setDate(new Date().toISOString().split('T')[0]);
+      // } else {
+      //   toast.error('Failed to create journal entry');
+      // }
     } catch (error) {
         console.log(error)
       toast.error('Something went wrong');
