@@ -1,38 +1,53 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/lib/prisma';
+import { journalEntrySchema } from '@/lib/validation';
 import { z } from 'zod';
-
-const prisma = new PrismaClient();
-
-const accountSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  type: z.enum(['Asset', 'Liability', 'Equity', 'Expense', 'Revenue']),
-});
 
 export async function GET() {
   try {
-    const accounts = await prisma.account.findMany();
-    return NextResponse.json(accounts);
+    const journalEntries = await prisma.journalEntry.findMany({
+      include: {
+        lines: {
+          include: {
+            account: {
+              select: { name: true },
+            },
+          },
+        },
+      },
+    });
+    return NextResponse.json(journalEntries);
   } catch (error) {
-    console.error('Error fetching accounts:', error);
-    return NextResponse.json({ error: 'Failed to fetch accounts' }, { status: 500 });
+    console.error('Error fetching journal entries:', error);
+    return NextResponse.json({ error: 'Failed to fetch journal entries' }, { status: 500 });
   }
 }
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const validatedData = accountSchema.parse(body);
-    
-    const account = await prisma.account.create({
-      data: validatedData,
+    const validatedData = journalEntrySchema.parse(body);
+
+    const journalEntry = await prisma.journalEntry.create({
+      data: {
+        date: new Date(validatedData.date),
+        memo: validatedData.memo,
+        lines: {
+          create: validatedData.lines.map(line => ({
+            accountId: line.accountId,
+            debit: line.debit,
+            credit: line.credit,
+          })),
+        },
+      },
+      include: { lines: true },
     });
-    
-    return NextResponse.json(account, { status: 201 });
+
+    return NextResponse.json(journalEntry, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.errors }, { status: 400 });
     }
-    return NextResponse.json({ error: 'Failed to create account' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to create journal entry' }, { status: 500 });
   }
 }
