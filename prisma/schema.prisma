@@ -1,0 +1,36 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id        String             @id @default(cuid())
+  name      String
+  type      String // Asset, Liability, Equity, Expense, Revenue
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @default(now())
+  entries   JournalEntryLine[]
+}
+
+model JournalEntry {
+  id        String             @id @default(cuid())
+  date      DateTime
+  memo      String?
+  lines     JournalEntryLine[]
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @default(now())
+}
+
+model JournalEntryLine {
+  id            String      @id @default(cuid())
+  journalEntryId String
+  accountId     String
+  debit         Float       @default(0)
+  credit        Float       @default(0)
+  journalEntry  JournalEntry @relation(fields: [journalEntryId], references: [id])
+  account       Account     @relation(fields: [accountId], references: [id])
+}
